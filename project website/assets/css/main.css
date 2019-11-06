@@ -211,12 +211,9 @@ input, select, textarea {
 	}
 	
 /* User Defined CSS */
-
-	table.scroll_table {
-		background-color: #333;
-		overflow-x: auto;
-		white-space: nowrap;
-
+	table.scroll_table{
+		table-layout: auto;
+		width:100%;
 	}
 	
 	div.scroll_table {
