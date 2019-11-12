@@ -209,6 +209,18 @@ input, select, textarea {
 	br.clear {
 		clear: both;
 	}
+	
+/* User Defined CSS */
+	table.scroll_table{
+		table-layout: auto;
+		width:100%;
+	}
+	
+	div.scroll_table {
+		overflow-x:scroll;
+	}
+	
+/* End of User Defined CSS*/
 
 /* Container */
 
@@ -2594,6 +2606,14 @@ input, select, textarea {
 			.container {
 				padding: 0 15px 0 15px;
 			}
+		
+		/* User Defined CSS */
+		
+			div.scroll_table {
+				overflow-x:scroll;
+			}
+			
+		/* End of User Defined */
 
 		/* List */
 
