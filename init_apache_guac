@@ -1,0 +1,82 @@
+#!/bin/bash
+
+#docker container names
+client_container="guacamole/guacd"
+server_container="guacamole/guacamole"
+mysql_container="mysql"
+
+#container names
+mysql_name="some-mysql"
+server_name="some-guacamole"
+client_name="some-guacd"
+
+#mysql database password
+mysql_password="secret"
+
+#Get the guacamole docker container
+get_guacd(){
+    sudo docker pull $client_container
+    sudo docker run --name $client_name -d $client_container
+    sudo docker ps
+}
+
+exec_mysql(){
+    sudo docker exec -it $mysql_name /bin/bash
+    mysql -h localhost -p
+}
+
+#Get the mysql docker container 
+#Set up mysql database for Apache Guacamole
+get_mysql(){
+    sudo docker pull $mysql_container
+    sudo docker run --name $mysql_name MYSQL_ROOT_PASSWORD=$mysql_password -p 3306:3306 mysql:latest
+    echo "Input sudo password"
+    read pass
+    echo $pass | sudo -S docker run --name $mysql_name -e MYSQL_ROOT_PASSWORD=$mysql_password -p 3306:3306 mysql:latest &
+    gnome-terminal --tab -- bash -c "echo wait until mysql is done setting up && read && echo $pass | sudo -S docker exec -it $mysql_name /bin/bash && mysql -h localhost -p"
+}
+
+#Stop and remove the existing containers
+rm_containers(){
+    echo "Do you need to delete older Docker containers? [Y/n]?"
+    read response
+    case $response in
+        [Yy]) 
+            echo "Removing Docker containers..."
+            sudo docker stop $client_name $server_name $mysql_name
+            sudo docker rm $client_name $server_name $mysql_name
+            ;;
+        [Nn]) 
+            echo "Initializing Apache Guacamole..."
+            ;;
+        *)
+            echo "Invalid Input..."
+            rm_container
+            ;;
+    esac
+}
+
+#install docker if user doesn't already have it
+install_docker(){
+    echo "Do you need to install Docker [Y/n]?"
+    read response
+    case $response in
+        [Yy]) 
+            echo "Installing Docker..."
+            sudo apt-get update
+            sudo apt-get install docker
+            ;;
+        [Nn]) 
+            echo "Initializing Apache Guacamole..."
+            ;;
+        *)
+            echo "Invalid Input..."
+            exit
+            ;;
+    esac
+}
+
+install_docker
+rm_containers
+get_guacd
+get_mysql
