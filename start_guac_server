@@ -1,0 +1,1 @@
+sudo docker run --name some-guacamole --link some-guacd:guacd --link some-mysql:mysql -e MYSQL_DATABASE=guacamole_db -e MYSQL_USER=root -e MYSQL_PASSWORD=secret -e MYSQL_HOSTNAME=some_mysql -e MYSQL_PORT=3306 -v /home/cisadmin/guacamole/test:/home/admin/guacamole/test -p 8080:8080 mabarkdoll/guacamole-client
