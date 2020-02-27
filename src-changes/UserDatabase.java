@@ -28,11 +28,34 @@ public class UserDatabase {
 			return DriverManager.getConnection(DB_URL, username, password);
 		}catch(SQLException s) {
 			s.printStackTrace();
-			return null;
 		}catch(Exception e) {
 			e.printStackTrace();
-			return null;
-		}
+		};
+		return null;
 	}
 	
+	public boolean executeQuery(Connection conn, String sqlStmt) {
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(sqlStmt);
+			return true;
+		}catch(SQLException s) {
+			s.printStackTrace();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+	
+	public boolean closeConnection(Connection conn) {
+		try {
+			if(conn != null)
+				conn.close();
+		}catch(SQLException s) {
+			s.printStackTrace();
+		}
+		
+		return false;
+	}
 }
