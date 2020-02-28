@@ -2,19 +2,15 @@ package org.apache.guacamole.jdbc.shared.user;
 
 import java.sql.*;
 
-public class UserDatabase {
-	
-	//database driver name and database URL
-	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost/";
-	
+public class UserDatabase {	
 	//database credentials
-	private static String username = "guacadmin";
-	private static String password = "guacadmin";
+	private static String username;
+	private static String password;
 	
 	//constructors
 	public UserDatabase() {
-		
+		username = "guacadmin";
+		password = "guacadmin";
 	}
 	
 	public UserDatabase(String user, String pass) {
@@ -23,14 +19,28 @@ public class UserDatabase {
 	}
 	
 	//user defined functions
-	public Connection connect() {
+	public Connection connect(String url) {
 		try {
-			return DriverManager.getConnection(DB_URL, username, password);
+			return DriverManager.getConnection(url, username, password);
 		}catch(SQLException s) {
 			s.printStackTrace();
 		}catch(Exception e) {
 			e.printStackTrace();
 		};
+		
+		return null;
+	}
+	
+	//user defined functions
+	public Connection connect(String url, String username, String password) {
+		try {
+			return DriverManager.getConnection(url, username, password);
+		}catch(SQLException s) {
+			s.printStackTrace();
+		}catch(Exception e) {
+			e.printStackTrace();
+		};
+		
 		return null;
 	}
 	
