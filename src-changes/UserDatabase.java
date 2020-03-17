@@ -5,23 +5,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class UserDatabase {
-	//database credentials
+public class UserDatabase implements SharedDatabase{
+	//----------database credentials----------//
 	private Map<String, String> databaseCredentials = new 
 			ConcurrentHashMap<String, String>();
+	public CredentialKeys credentialKeys;
 	
-	//constructors
+	//----------constructors----------//
 	
 	/**
-	 * creates a new UserDatabase instance with default credentials
+	 * Creates a new UserDatabase instance with default credentials
 	 * */
 	public UserDatabase() {
-		databaseCredentials.put("username", "guacadmin");
-		databaseCredentials.put("password", "guacadmin");
+		databaseCredentials.put(credentialKeys.USERNAME.toString(), 
+				"guacadmin");
+		databaseCredentials.put(credentialKeys.USERNAME.toString(), 
+				"guacadmin");
 	}
 	
 	/**
-	 * Returns an SQL connection provided by the given url
+	 * Creates a new UserDatabase instance with custom credentials
 	 * 
 	 * @param username
 	 * 		Sql database username 
@@ -30,11 +33,13 @@ public class UserDatabase {
 	 * 		Sql database password
 	 * */
 	public UserDatabase(String username, String password) {
-		databaseCredentials.put("username", username);
-		databaseCredentials.put("password", password);
+		databaseCredentials.put(credentialKeys.USERNAME.toString(), 
+				username);
+		databaseCredentials.put(credentialKeys.PASSWORD.toString(), 
+				password);
 	}
 	
-	//user defined functions
+	//----------user defined functions----------//
 	
 	/**
 	 * Returns an SQL connection provided by the given connection 
@@ -47,12 +52,13 @@ public class UserDatabase {
 	 * 		ConcurrentHashMap containing sql database credentials 
 	 * 		(i.e username and password)
 	 * */
+	@Override
 	public Connection connect(String connectionUrl) {
 		try {
 			return DriverManager.getConnection(
 					connectionUrl, 
-					databaseCredentials.get("username"), 
-					databaseCredentials.get("password"));
+					databaseCredentials.get(credentialKeys.USERNAME), 
+					databaseCredentials.get(credentialKeys.PASSWORD));
 		}catch(SQLException s) {
 			s.printStackTrace();
 		}catch(Exception e) {
@@ -73,12 +79,13 @@ public class UserDatabase {
 	 * 		ConcurrentHashMap containing sql database credentials 
 	 * 		(i.e username and password)
 	 * */
+	@Override
 	public Connection connect(String connectionUrl, ConcurrentHashMap<String, String> credentials) {
 		try {
 			return DriverManager.getConnection(
 					connectionUrl, 
-					credentials.get("username"), 
-					credentials.get("password"));
+					credentials.get(credentialKeys.USERNAME.toString()), 
+					credentials.get(credentialKeys.PASSWORD.toString()));
 		}catch(SQLException s) {
 			s.printStackTrace();
 		}catch(Exception e) {
@@ -97,6 +104,7 @@ public class UserDatabase {
 	 * @param sqlStmt
 	 * 		Sql executable command
 	 * */
+	@Override
 	public boolean executeQuery(Connection connection, String sqlStmt) {
 		try {
 			Statement stmt = connection.createStatement();
@@ -117,6 +125,7 @@ public class UserDatabase {
 	 * @param connection
 	 * 		Sql connection being closed
 	 * */
+	@Override
 	public boolean closeConnection(Connection connection) {
 		try {
 			if(!connection.isClosed()) {
@@ -133,7 +142,7 @@ public class UserDatabase {
 	 * Returns username credential for sql database
 	 * */
 	public String getUsername() {
-		return databaseCredentials.get("username");
+		return databaseCredentials.get(credentialKeys.USERNAME.toString());
 	}
 	
 	/**
@@ -143,7 +152,8 @@ public class UserDatabase {
 	 * 		Set username credential for sql database
 	 * */
 	public void setUsername(String newUsername) {
-		databaseCredentials.replace("username", newUsername);
+		databaseCredentials.replace(credentialKeys.USERNAME.toString(), 
+				newUsername);
 	}
 	
 	/**
