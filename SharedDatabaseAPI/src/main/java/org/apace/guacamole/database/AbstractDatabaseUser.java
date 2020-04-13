@@ -113,8 +113,6 @@ public class AbstractDatabaseUser implements DatabaseUser {
 	public AbstractDatabaseUser(){
 		userCredentials.put(CredentialKeys.USERNAME.toString(), "guacadmin");
 		userCredentials.put(CredentialKeys.PASSWORD.toString(), "guacadmin");
-		
-		
 	}
 	
 	public AbstractDatabaseUser(String username, String password){
