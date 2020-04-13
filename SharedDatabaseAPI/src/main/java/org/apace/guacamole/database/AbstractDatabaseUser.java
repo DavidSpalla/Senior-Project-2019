@@ -1,6 +1,5 @@
 package org.apace.guacamole.database;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -8,11 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.guacamole.GuacamoleException;
-import org.apache.guacamole.net.auth.ActivityRecord;
+import org.apache.guacamole.net.auth.ConnectionRecord;
 import org.apache.guacamole.net.auth.Permissions;
 import org.apache.guacamole.net.auth.RelatedObjectSet;
 import org.apache.guacamole.net.auth.permission.ObjectPermissionSet;
-import org.apache.guacamole.net.auth.permission.Permission;
 import org.apache.guacamole.net.auth.permission.SystemPermissionSet;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
 
@@ -44,9 +42,8 @@ public class AbstractDatabaseUser implements DatabaseUser {
 	
 	/**
 	 * 
-	 * */
-	List<ActivityRecord> activityRecordList = 
-			new ArrayList<ActivityRecord>();
+	 * */	
+	List<ConnectionRecord> recordList;
 	
 	/**
 	 * 
@@ -73,6 +70,9 @@ public class AbstractDatabaseUser implements DatabaseUser {
 	 * */
 	String parentIdentifier;
 	
+	/**
+	 * 
+	 * */
 	ObjectPermissionSet userPermissions;
 	
 	/**
@@ -135,10 +135,9 @@ public class AbstractDatabaseUser implements DatabaseUser {
 	public Date getLastActive() {
 		return this.lastActive;
 	}
-
-	public List<? extends ActivityRecord> getHistory() throws GuacamoleException {
-		//TODO implement getHistory()
-		return this.activityRecordList;
+	
+	public List<ConnectionRecord> getHistory() throws GuacamoleException {
+		return this.recordList;
 	}
 
 	public RelatedObjectSet getUserGroups() throws GuacamoleException {
