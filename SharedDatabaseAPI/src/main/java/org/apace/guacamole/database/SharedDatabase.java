@@ -33,8 +33,7 @@ import java.sql.SQLException;
 public interface SharedDatabase {
 	public Connection connect(String connectionUrl) throws SQLException;
 	public Connection connect(String connectionUrl, 
-			ConcurrentHashMap<String, String> credentials) 
-					throws SQLException;
+			ConcurrentHashMap<String, String> credentials) throws SQLException;
 	public boolean executeQuery(Connection connection, 
 			String sqlCmd);
 	public boolean closeConnection(Connection connection);

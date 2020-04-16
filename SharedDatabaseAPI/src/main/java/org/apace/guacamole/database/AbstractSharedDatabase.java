@@ -32,6 +32,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AbstractSharedDatabase implements SharedDatabase {
 	
 	/**
+	 * Sql database table name
+	 * */
+	private String tableName;
+	
+	/**
+	 * Comma seperated string for database column names
+	 * */
+	private String tableColumns;
+	
+	/**
+	 * Comma seperated string for database column values
+	 * */
+	private String tableColumnValues;
+	
+	/**
 	 * Connects to a shared database
 	 * 
 	 * @param connectionUrl
@@ -122,4 +137,111 @@ public class AbstractSharedDatabase implements SharedDatabase {
 		}
 	}
 	
+	/**
+	 * Sets table column names
+	 * 
+	 * @param columnNames
+	 * */
+	public void setTableColumns(String columnNames[]) {
+		String entry;
+		
+		for(int i = 0; i < columnNames.length; i++) {
+			if(i == columnNames.length - 1)
+				entry = columnNames[i];
+			else
+				entry = columnNames[i] + ", ";
+			
+			this.tableColumns += entry;
+		}		
+	}
+	
+	/**
+	 * Sets table column names
+	 * 
+	 * @param columnNames
+	 * */
+	public void setTableColumns(String columnNames) {
+		this.tableColumns = columnNames;
+	}
+	
+	/**
+	 * Sets table column values
+	 * 
+	 * @param values
+	 * */
+	public void setTableColumnValues(String values[]) {
+		String entry;
+		
+		for(int i = 0; i < values.length; i++) {
+			if(i == values.length - 1)
+				entry = values[i];
+			else
+				entry = values[i] + ", ";
+			
+			this.tableColumnValues += entry;
+		}		
+	}
+	
+	/**
+	 * Sets table column values
+	 * 
+	 * @param values
+	 * */
+	public void setTableColumnValues(String values) {
+		this.tableColumnValues = values;
+	}
+	
+	/**
+	 * Returns a comma seperated String of the 
+	 * different column names in the Sql SharedDatabase
+	 * 
+	 * @return
+	 * 		Comma seperated String of column names
+	 * */
+	public String getTableColumns() {
+		return this.tableColumns;
+	}
+	
+	/**
+	 * Sets current table name in the SharedDatabase
+	 * */
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+	
+	/**
+	 * Returns the current table name
+	 * 
+	 * @return
+	 * 		SQL SharedDatabase table name
+	 * */
+	public String getTableName() {
+		return this.tableName;
+	}
+	
+	/**
+	 * Returns an sql insert statement made up of the 
+	 * current set for the table name, column names, and 
+	 * values of the columns
+	 * 
+	 * @return
+	 * 		A fully built sql insert statement
+	 * */
+	private String getInsertStatement() {
+		if(this.tableName == null || 
+				this.tableColumns == null || 
+				this.tableColumnValues == null) {
+			return null;
+		}
+
+		String insertStatement = 
+				"INSERT INTO " +
+				this.tableName +
+				" (" +
+				this.tableColumns +
+				") VALUES (" +
+				this.tableColumnValues +
+				");";
+		return insertStatement;
+	}
 }
