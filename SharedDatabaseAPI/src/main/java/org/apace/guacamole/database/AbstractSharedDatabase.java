@@ -29,24 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Base implementation of SharedDatabase which provides default implementations of
  * most functions.
  */
-public class AbstractSharedDatabase implements SharedDatabase {
-	
+public class AbstractSharedDatabase implements SharedDatabase {	
 	/**
-	 * Sql database table name
-	 * */
-	private String tableName;
-	
-	/**
-	 * Comma seperated string for database column names
-	 * */
-	private String tableColumns;
-	
-	/**
-	 * Comma seperated string for database column values
-	 * */
-	private String tableColumnValues;
-	
-	/**
+	 * @author raymond
+	 * 
 	 * Connects to a shared database
 	 * 
 	 * @param connectionUrl
@@ -66,6 +52,8 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
+	 * @author raymond
+	 * 
 	 * Connects to a secured shared database
 	 * 
 	 * @param connectionUrl
@@ -90,6 +78,8 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
+	 * @author raymond
+	 * 
 	 * Executes an INSERT, UPDATE, or DELETE command
 	 * 
 	 * @param connection
@@ -116,6 +106,8 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
+	 * @author raymond
+	 * 
 	 * Closes a connection
 	 * 
 	 * @param connection
@@ -138,38 +130,17 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * Sets table column names
+	 * @author raymond
 	 * 
-	 * @param columnNames
-	 * */
-	public void setTableColumns(String columnNames[]) {
-		String entry;
-		
-		for(int i = 0; i < columnNames.length; i++) {
-			if(i == columnNames.length - 1)
-				entry = columnNames[i];
-			else
-				entry = columnNames[i] + ", ";
-			
-			this.tableColumns += entry;
-		}		
-	}
-	
-	/**
-	 * Sets table column names
-	 * 
-	 * @param columnNames
-	 * */
-	public void setTableColumns(String columnNames) {
-		this.tableColumns = columnNames;
-	}
-	
-	/**
-	 * Sets table column values
+	 * Returns a given array as a comma seperated string
 	 * 
 	 * @param values
+	 * 
+	 * @return
+	 * 		Comma seperated list of values
 	 * */
-	public void setTableColumnValues(String values[]) {
+	public String convertToString(String values[]) {
+		String valueString = null;
 		String entry;
 		
 		for(int i = 0; i < values.length; i++) {
@@ -178,70 +149,83 @@ public class AbstractSharedDatabase implements SharedDatabase {
 			else
 				entry = values[i] + ", ";
 			
-			this.tableColumnValues += entry;
-		}		
+			valueString += entry;
+		}
+		
+		return valueString;
 	}
 	
 	/**
-	 * Sets table column values
+	 * @author raymond
+	 * 
+	 * Returns an sql insert statement made up of the 
+	 * given the table name, column names, and 
+	 * values of the columns
+	 * 
+	 * @param table
+	 * 
+	 * @param columnValues
 	 * 
 	 * @param values
-	 * */
-	public void setTableColumnValues(String values) {
-		this.tableColumnValues = values;
-	}
-	
-	/**
-	 * Returns a comma seperated String of the 
-	 * different column names in the Sql SharedDatabase
-	 * 
-	 * @return
-	 * 		Comma seperated String of column names
-	 * */
-	public String getTableColumns() {
-		return this.tableColumns;
-	}
-	
-	/**
-	 * Sets current table name in the SharedDatabase
-	 * */
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-	
-	/**
-	 * Returns the current table name
-	 * 
-	 * @return
-	 * 		SQL SharedDatabase table name
-	 * */
-	public String getTableName() {
-		return this.tableName;
-	}
-	
-	/**
-	 * Returns an sql insert statement made up of the 
-	 * current set for the table name, column names, and 
-	 * values of the columns
 	 * 
 	 * @return
 	 * 		A fully built sql insert statement
+	 * 
+	 * @throws GuacamoleSharedDatabaseException 
 	 * */
-	private String getInsertStatement() {
-		if(this.tableName == null || 
-				this.tableColumns == null || 
-				this.tableColumnValues == null) {
-			return null;
+	public String getInsertStatement(String table, String columnNames[], String columnValues[], 
+			String values[]) throws GuacamoleSharedDatabaseException {
+		String colNumErr = "Number of values being added does not match number of columns in table.";
+		String insertStatement = null;
+		
+		if(table == null || 
+		   columnValues == null) {
+			return insertStatement;
 		}
+		
+		if(values.length != columnNames.length)
+			throw new GuacamoleSharedDatabaseException(colNumErr);
 
-		String insertStatement = 
+		insertStatement = 
 				"INSERT INTO " +
-				this.tableName +
+				table +
 				" (" +
-				this.tableColumns +
+				convertToString(columnValues) +
 				") VALUES (" +
-				this.tableColumnValues +
+				convertToString(values) +
 				");";
+		
 		return insertStatement;
+	}
+	
+	/**
+	 * @author raymond
+	 * 
+	 * Returns an sql delete statement that will delete an entry
+	 * with the given username from the given table
+	 * 
+	 * @param table
+	 * 
+	 * @param username
+	 * 
+	 * @return
+	 * 		Fully valid sql delete statement
+	 * */
+	public String getDeleteStatement(String table, String columnNames[], String username) {
+		String deleteStatement = null;
+		
+		if(table == null || 
+				columnNames == null) {
+			return deleteStatement;
+		}
+		
+		deleteStatement = 
+				"DELETE FROM " +
+				table + 
+				" WHERE NAME = '" +
+				username +
+				"';";
+		
+		return deleteStatement;
 	}
 }
