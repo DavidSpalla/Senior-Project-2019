@@ -31,6 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AbstractSharedDatabase implements SharedDatabase {	
 	
+	private String idColumnName;
+	
+	public AbstractSharedDatabase(String idColumnName) {
+		this.idColumnName = idColumnName;
+	}
+	
 	/** 
 	 * Connects to a shared database
 	 * 
@@ -127,31 +133,6 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	
 	/**
 	 * 
-	 * Returns a given array as a comma seperated string
-	 * 
-	 * @param values
-	 * 
-	 * @return
-	 * 		Comma seperated list of values
-	 * */
-	public String convertToString(String values[]) {
-		String valueString = null;
-		String entry;
-		
-		for(int i = 0; i < values.length; i++) {
-			if(i == values.length - 1)
-				entry = values[i];
-			else
-				entry = values[i] + ", ";
-			
-			valueString += entry;
-		}
-		
-		return valueString;
-	}
-	
-	/**
-	 * 
 	 * Returns a string that can be used to execute an sql INSERT command
 	 * into a given table.
 	 * 
@@ -172,6 +153,7 @@ public class AbstractSharedDatabase implements SharedDatabase {
 		String invalidTable = "Table name is null";
 		String invalidColumnValues = "Column values are null";
 		String insertStatement = null;
+		String argument;
 		
 		if(table == null)
 			throw new GuacamoleSharedDatabaseException(invalidTable);
@@ -182,14 +164,25 @@ public class AbstractSharedDatabase implements SharedDatabase {
 		if(columnNames.length != columnNames.length)
 			throw new GuacamoleSharedDatabaseException(colNumErr);
 
-		insertStatement = 
-				"INSERT INTO " +
-				table +
-				" (" +
-				convertToString(columnNames) +
-				") VALUES (" +
-				convertToString(columnValues) +
-				");";
+		insertStatement = "INSERT INTO " + table + " (";
+		for(int i = 0; i < columnNames.length; i++) {
+			if(i != columnNames.length - 1)
+				argument = columnNames[i] + ") ";
+			else
+				argument = columnNames[i] + ", ";
+			
+			insertStatement += argument;
+		}
+		
+		insertStatement += "VALUES (";
+		for(int i = 0; i < columnValues.length; i++) {
+			if(i == columnValues.length - 1)
+				argument = "'" + columnValues[i] + "');";
+			else
+				argument = "'" + columnValues[i] + "', ";
+			
+			insertStatement += argument;
+		}
 		
 		return insertStatement;
 	}
@@ -223,7 +216,9 @@ public class AbstractSharedDatabase implements SharedDatabase {
 		deleteStatement = 
 				"DELETE FROM " +
 				table + 
-				" WHERE IDENTIFIER = '" +
+				" WHERE " + 
+				getRowIdentifier() + 
+				" = '" +
 				identifier +
 				"';";
 		
@@ -284,8 +279,52 @@ public class AbstractSharedDatabase implements SharedDatabase {
 			updateStatement += setArgument;
 		}
 		
-		updateStatement += "WHERE IDENTIFIER = " + identifier + ";";
+		updateStatement += "WHERE " + getRowIdentifier() + " = '" + identifier + "';";
 		
 		return updateStatement;
+	}
+	
+	/**
+	 * Returns a string that can be used to execute an sql SELECT command to
+	 * get the highest id in the table that can then be incremented and used to 
+	 * store a new entry with a new unique integer id.
+	 * 
+	 * @param table
+	 * 
+	 * @param idColumnName
+	 * 
+	 * @return
+	 * 		Returns a string that can be used to execute a SELECT command that can then
+	 * 		in turn be used to retrieve the highest integer id in the table
+	 * */
+	public String getNextId(String table, String idColumnName) {
+		String nextId;
+		
+		nextId = "SELECT MAX(" + idColumnName + ") FROM " + table +";";
+		
+		return nextId;
+	}
+	
+	/**
+	 * Sets the unique identifier column name that each entry in the table 
+	 * will have.
+	 * 
+	 * @param idColumnName
+	 * 
+	 * */
+	public void setRowIdentifier(String idColumnName) {
+		this.idColumnName = idColumnName;
+	}
+	
+	/**
+	 * Returns the columnName that contains an entry's unique identifier.
+	 * 
+	 * @return
+	 * 		A string that will be the column name containing an entry's unique
+	 * 		identifier.
+	 * 
+	 * */
+	public String getRowIdentifier() {
+		return this.idColumnName;
 	}
 }
