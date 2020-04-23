@@ -30,9 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * most functions.
  */
 public class AbstractSharedDatabase implements SharedDatabase {	
-	/**
-	 * @author raymond
-	 * 
+	
+	/** 
 	 * Connects to a shared database
 	 * 
 	 * @param connectionUrl
@@ -52,7 +51,6 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * @author raymond
 	 * 
 	 * Connects to a secured shared database
 	 * 
@@ -78,7 +76,6 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * @author raymond
 	 * 
 	 * Executes an INSERT, UPDATE, or DELETE command
 	 * 
@@ -106,7 +103,6 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * @author raymond
 	 * 
 	 * Closes a connection
 	 * 
@@ -130,7 +126,6 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * @author raymond
 	 * 
 	 * Returns a given array as a comma seperated string
 	 * 
@@ -156,76 +151,141 @@ public class AbstractSharedDatabase implements SharedDatabase {
 	}
 	
 	/**
-	 * @author raymond
 	 * 
-	 * Returns an sql insert statement made up of the 
-	 * given the table name, column names, and 
-	 * values of the columns
+	 * Returns a string that can be used to execute an sql INSERT command
+	 * into a given table.
 	 * 
 	 * @param table
 	 * 
+	 * @param columnNames
+	 * 
 	 * @param columnValues
 	 * 
-	 * @param values
-	 * 
 	 * @return
-	 * 		A fully built sql insert statement
+	 * 		A string that can be used to execute an sql INSERT command
 	 * 
 	 * @throws GuacamoleSharedDatabaseException 
 	 * */
-	public String getInsertStatement(String table, String columnNames[], String columnValues[], 
-			String values[]) throws GuacamoleSharedDatabaseException {
+	public String getInsertStatement(String table, String columnNames[], String columnValues[]) 
+			throws GuacamoleSharedDatabaseException {
 		String colNumErr = "Number of values being added does not match number of columns in table.";
+		String invalidTable = "Table name is null";
+		String invalidColumnValues = "Column values are null";
 		String insertStatement = null;
 		
-		if(table == null || 
-		   columnValues == null) {
-			return insertStatement;
-		}
+		if(table == null)
+			throw new GuacamoleSharedDatabaseException(invalidTable);
 		
-		if(values.length != columnNames.length)
+		if(columnValues == null)
+			throw new GuacamoleSharedDatabaseException(invalidColumnValues);
+		
+		if(columnNames.length != columnNames.length)
 			throw new GuacamoleSharedDatabaseException(colNumErr);
 
 		insertStatement = 
 				"INSERT INTO " +
 				table +
 				" (" +
-				convertToString(columnValues) +
+				convertToString(columnNames) +
 				") VALUES (" +
-				convertToString(values) +
+				convertToString(columnValues) +
 				");";
 		
 		return insertStatement;
 	}
 	
 	/**
-	 * @author raymond
 	 * 
-	 * Returns an sql delete statement that will delete an entry
-	 * with the given username from the given table
+	 * Returns a string that can be user to execute an sql DELETE 
+	 * command on a particular row in a table where it contains the 
+	 * the unique identifier
 	 * 
 	 * @param table
 	 * 
-	 * @param username
+	 * @param identifier
 	 * 
 	 * @return
-	 * 		Fully valid sql delete statement
+	 * 		A string that can be used to execute an sql DELETE command
 	 * */
-	public String getDeleteStatement(String table, String columnNames[], String username) {
+	public String getDeleteStatement(String table, String identifier) 
+			throws GuacamoleSharedDatabaseException{
 		String deleteStatement = null;
 		
-		if(table == null || 
-				columnNames == null) {
-			return deleteStatement;
-		}
+		String invalidTable = "Table name is null";
+		String invalidIdentifier = "Column names are null";
+		
+		if(table == null)
+			throw new GuacamoleSharedDatabaseException(invalidTable);
+		
+		if(identifier == null)
+			throw new GuacamoleSharedDatabaseException(invalidIdentifier);
 		
 		deleteStatement = 
 				"DELETE FROM " +
 				table + 
-				" WHERE NAME = '" +
-				username +
+				" WHERE IDENTIFIER = '" +
+				identifier +
 				"';";
 		
 		return deleteStatement;
+	}
+	
+	/**
+	 * 
+	 * Returns a string that can be used to execute an sql UPDATE command
+	 * based on a user with a unique identifier the table this user is in, 
+	 * column names or the table, and the new values you want associated with 
+	 * the given user.
+	 * 
+	 * @param table
+	 * 
+	 * @param columnNames
+	 * 
+	 * @param columnValues
+	 * 
+	 * @param identifier
+	 * 
+	 * @return
+	 * 		Returns a string that can be used to execute an sql UPDATE command
+	 * 
+	 * @throws GuacamoleSharedDatabaseException
+	 * */
+	public String getUpdateStatement(String table, String columnNames[], 
+			String columnValues[], String identifier) throws GuacamoleSharedDatabaseException {
+		
+		String invalidIdentifier = "Identifier is null";
+		String invalidTableName = "Table is null";
+		String lengthError = "Number of columns does not match the number of values";
+		
+		String setArgument;
+		
+		String updateStatement = null;
+		
+		if(table == null)
+			throw new GuacamoleSharedDatabaseException(invalidTableName);
+		
+		if(identifier == null)
+			throw new GuacamoleSharedDatabaseException(invalidIdentifier);
+		
+		if(columnValues.length != columnNames.length)
+			throw new GuacamoleSharedDatabaseException(lengthError);
+		
+		updateStatement = 
+				"UPDATE " +
+				table +
+				" SET (";
+				
+		for(int i = 0; i < columnNames.length; i++) {
+			if(i != columnNames.length - 1)
+				setArgument = columnNames[i] + " = '" + columnValues[i] + "', ";
+			else
+				setArgument = columnNames[i] + " = '" + columnValues[i] + "') ";
+			
+			updateStatement += setArgument;
+		}
+		
+		updateStatement += "WHERE IDENTIFIER = " + identifier + ";";
+		
+		return updateStatement;
 	}
 }
